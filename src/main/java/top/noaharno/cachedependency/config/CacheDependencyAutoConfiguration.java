@@ -1,5 +1,8 @@
 package top.noaharno.cachedependency.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
+import org.springframework.context.annotation.DependsOn;
 import top.noaharno.cachedependency.interceptor.TableAnalysisInterceptor;
 import top.noaharno.cachedependency.service.CacheDependencyService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -17,6 +20,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  */
 @Configuration
 @EnableConfigurationProperties(CacheDependencyProperties.class)
+@ConditionalOnBooleanProperty(prefix = "cache.dependency", value = "enabled", matchIfMissing = true)
 public class CacheDependencyAutoConfiguration {
 
     @Bean
