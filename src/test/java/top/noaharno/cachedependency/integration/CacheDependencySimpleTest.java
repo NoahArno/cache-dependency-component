@@ -1,4 +1,4 @@
-package top.noaharno.cacheconsistency.integration;
+package top.noaharno.cachedependency.integration;
 
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
@@ -6,21 +6,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import top.noaharno.cacheconsistency.TestApplication;
-import top.noaharno.cacheconsistency.config.CacheConsistencyProperties;
-import top.noaharno.cacheconsistency.constant.CacheLevelEnum;
-import top.noaharno.cacheconsistency.entity.User;
-import top.noaharno.cacheconsistency.interceptor.TableAnalysisInterceptor;
-import top.noaharno.cacheconsistency.mapper.UserMapper;
-import top.noaharno.cacheconsistency.mapper.OrderMapper;
-import top.noaharno.cacheconsistency.mapper.ProductMapper;
-import top.noaharno.cacheconsistency.service.CacheDependencyService;
+import top.noaharno.cachedependency.TestApplication;
+import top.noaharno.cachedependency.config.CacheDependencyProperties;
+import top.noaharno.cachedependency.constant.CacheLevelEnum;
+import top.noaharno.cachedependency.entity.User;
+import top.noaharno.cachedependency.interceptor.TableAnalysisInterceptor;
+import top.noaharno.cachedependency.mapper.UserMapper;
+import top.noaharno.cachedependency.mapper.OrderMapper;
+import top.noaharno.cachedependency.mapper.ProductMapper;
+import top.noaharno.cachedependency.service.CacheDependencyService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {TestApplication.class})
 @ActiveProfiles("test")
-public class CacheConsistencySimpleTest {
+public class CacheDependencySimpleTest {
 
 
     @Autowired
@@ -30,7 +30,7 @@ public class CacheConsistencySimpleTest {
     private CacheDependencyService cacheDependencyService;
 
     @Autowired
-    private CacheConsistencyProperties cacheConsistencyProperties;
+    private CacheDependencyProperties cacheDependencyProperties;
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -55,7 +55,7 @@ public class CacheConsistencySimpleTest {
         // 测试所需的Bean是否被正确创建
         assertNotNull(tableAnalysisInterceptor);
         assertNotNull(cacheDependencyService);
-        assertNotNull(cacheConsistencyProperties);
+        assertNotNull(cacheDependencyProperties);
         assertNotNull(userMapper);
         assertNotNull(orderMapper);
         assertNotNull(productMapper);
@@ -133,7 +133,7 @@ public class CacheConsistencySimpleTest {
         assertEquals(1, userOrders.size(), "用户应该有一个订单");
         
         // 插入新产品
-        var newProduct = new top.noaharno.cacheconsistency.entity.Product();
+        var newProduct = new top.noaharno.cachedependency.entity.Product();
         newProduct.setName("Monitor");
         newProduct.setDescription("27-inch 4K Monitor");
         newProduct.setPrice(300.00);
@@ -143,7 +143,7 @@ public class CacheConsistencySimpleTest {
         assertNotNull(newProduct.getId(), "新产品的ID应该被生成");
         
         // 插入新订单
-        var newOrder = new top.noaharno.cacheconsistency.entity.Order();
+        var newOrder = new top.noaharno.cachedependency.entity.Order();
         newOrder.setUserId(1L);
         newOrder.setProductName("Monitor");
         newOrder.setPrice(300.00);

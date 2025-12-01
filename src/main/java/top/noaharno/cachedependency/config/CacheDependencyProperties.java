@@ -1,10 +1,9 @@
-package top.noaharno.cacheconsistency.config;
+package top.noaharno.cachedependency.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -15,8 +14,8 @@ import java.util.Set;
  * @since 1.0.0
  */
 @Data
-@ConfigurationProperties(prefix = "cache.consistency")
-public class CacheConsistencyProperties {
+@ConfigurationProperties(prefix = "cache.dependency")
+public class CacheDependencyProperties {
 
     /**
      * 是否启用缓存一致性功能

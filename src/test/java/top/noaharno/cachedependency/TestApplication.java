@@ -1,10 +1,9 @@
-package top.noaharno.cacheconsistency;
+package top.noaharno.cachedependency;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.ComponentScan;
 
 /**
  * @author NoahArno
@@ -13,7 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @EnableCaching
 @SpringBootApplication
-@MapperScan(basePackages = "top.noaharno.cacheconsistency.mapper")
+@MapperScan(basePackages = "top.noaharno.cachedependency.mapper")
 public class TestApplication {
 
     public static void main(String[] args) {

@@ -1,7 +1,7 @@
-package top.noaharno.cacheconsistency.config;
+package top.noaharno.cachedependency.config;
 
-import top.noaharno.cacheconsistency.interceptor.TableAnalysisInterceptor;
-import top.noaharno.cacheconsistency.service.CacheDependencyService;
+import top.noaharno.cachedependency.interceptor.TableAnalysisInterceptor;
+import top.noaharno.cachedependency.service.CacheDependencyService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,8 +16,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  * @since 1.0.0
  */
 @Configuration
-@EnableConfigurationProperties(CacheConsistencyProperties.class)
-public class CacheConsistencyAutoConfiguration {
+@EnableConfigurationProperties(CacheDependencyProperties.class)
+public class CacheDependencyAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
@@ -28,12 +28,12 @@ public class CacheConsistencyAutoConfiguration {
     @Bean
     public TableAnalysisInterceptor tableAnalysisInterceptor(StringRedisTemplate stringRedisTemplate,
                                                              CacheDependencyService cacheDependencyService,
-                                                             CacheConsistencyProperties cacheConsistencyProperties) {
-        return new TableAnalysisInterceptor(stringRedisTemplate, cacheDependencyService, cacheConsistencyProperties);
+                                                             CacheDependencyProperties cacheDependencyProperties) {
+        return new TableAnalysisInterceptor(stringRedisTemplate, cacheDependencyService, cacheDependencyProperties);
     }
 
     @Bean
-    public CacheDependencyService cacheDependencyService(StringRedisTemplate stringRedisTemplate, CacheConsistencyProperties cacheConsistencyProperties) {
-        return new CacheDependencyService(stringRedisTemplate, cacheConsistencyProperties);
+    public CacheDependencyService cacheDependencyService(StringRedisTemplate stringRedisTemplate, CacheDependencyProperties cacheDependencyProperties) {
+        return new CacheDependencyService(stringRedisTemplate, cacheDependencyProperties);
     }
 }

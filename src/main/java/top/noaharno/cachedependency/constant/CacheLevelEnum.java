@@ -1,4 +1,4 @@
-package top.noaharno.cacheconsistency.constant;
+package top.noaharno.cachedependency.constant;
 
 import lombok.Getter;
 

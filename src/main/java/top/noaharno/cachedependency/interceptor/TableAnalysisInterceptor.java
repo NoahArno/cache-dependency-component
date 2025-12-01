@@ -1,4 +1,4 @@
-package top.noaharno.cacheconsistency.interceptor;
+package top.noaharno.cachedependency.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.executor.Executor;
@@ -8,10 +8,10 @@ import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Signature;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import top.noaharno.cacheconsistency.config.CacheConsistencyProperties;
-import top.noaharno.cacheconsistency.constant.CacheLevelEnum;
-import top.noaharno.cacheconsistency.service.CacheDependencyService;
-import top.noaharno.cacheconsistency.util.SqlAnalysisUtil;
+import top.noaharno.cachedependency.config.CacheDependencyProperties;
+import top.noaharno.cachedependency.constant.CacheLevelEnum;
+import top.noaharno.cachedependency.service.CacheDependencyService;
+import top.noaharno.cachedependency.util.SqlAnalysisUtil;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -37,7 +37,7 @@ public class TableAnalysisInterceptor implements Interceptor {
      */
     private final ScheduledExecutorService scheduledExecutorService;
 
-    private final CacheConsistencyProperties properties;
+    private final CacheDependencyProperties properties;
 
     /**
      * 用于跟踪正在处理的表删除任务
@@ -46,7 +46,7 @@ public class TableAnalysisInterceptor implements Interceptor {
 
     public TableAnalysisInterceptor(StringRedisTemplate stringRedisTemplate,
                                     CacheDependencyService cacheDependencyService,
-                                    CacheConsistencyProperties properties) {
+                                    CacheDependencyProperties properties) {
         this.stringRedisTemplate = stringRedisTemplate;
         this.cacheDependencyService = cacheDependencyService;
         this.properties = properties;

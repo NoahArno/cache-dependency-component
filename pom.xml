@@ -6,12 +6,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>top.noaharno</groupId>
-    <artifactId>cache-consistency-spring-boot-starter</artifactId>
+    <artifactId>cache-dependency-spring-boot-starter</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Cache Consistency Spring Boot Starter</name>
-    <description>A Spring Boot Starter for cache consistency management</description>
+    <name>Cache Dependency Spring Boot Starter</name>
+    <description>A Spring Boot Starter for cache dependency management</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

@@ -1,10 +1,8 @@
-package top.noaharno.cacheconsistency.integration;
+package top.noaharno.cachedependency.integration;
 
 import com.alibaba.fastjson.JSON;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,20 +10,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import top.noaharno.cacheconsistency.TestApplication;
-import top.noaharno.cacheconsistency.entity.User;
-import top.noaharno.cacheconsistency.mapper.UserMapper;
-import top.noaharno.cacheconsistency.service.CacheDependencyService;
-import top.noaharno.cacheconsistency.service.UserService;
+import top.noaharno.cachedependency.TestApplication;
+import top.noaharno.cachedependency.entity.User;
+import top.noaharno.cachedependency.mapper.UserMapper;
+import top.noaharno.cachedependency.service.CacheDependencyService;
+import top.noaharno.cachedependency.service.UserService;
 
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {TestApplication.class})
 @ActiveProfiles("test")
-public class CacheConsistencyFunctionalTest {
+public class CacheDependencyFunctionalTest {
 
     @Autowired
     private CacheDependencyService cacheDependencyService;
@@ -84,20 +81,11 @@ public class CacheConsistencyFunctionalTest {
     
     @Test
     void testMultipleTableOperations() throws InterruptedException {
-        // 测试多表操作的缓存一致性
-        
+
         // 获取各表的初始版本号
         String userVersionKey = cacheDependencyService.getVersionKey("users");
         String orderVersionKey = cacheDependencyService.getVersionKey("orders");
         String productVersionKey = cacheDependencyService.getVersionKey("products");
-        
-        String initialUserVersion = stringRedisTemplate.opsForValue().get(userVersionKey);
-        String initialOrderVersion = stringRedisTemplate.opsForValue().get(orderVersionKey);
-        String initialProductVersion = stringRedisTemplate.opsForValue().get(productVersionKey);
-        
-        if (initialUserVersion == null) initialUserVersion = "0";
-        if (initialOrderVersion == null) initialOrderVersion = "0";
-        if (initialProductVersion == null) initialProductVersion = "0";
         
         // 对三个表分别进行更新操作
         User user = new User();
@@ -115,9 +103,10 @@ public class CacheConsistencyFunctionalTest {
         String updatedProductVersion = stringRedisTemplate.opsForValue().get(productVersionKey);
         
         assertNotNull(updatedUserVersion, "用户表版本号应该存在");
-        assertNotEquals(initialUserVersion, updatedUserVersion, "用户表版本号应该已更新");
+        assertEquals(updatedUserVersion, "1", "当Redis为空，然后执行数据库update操作时，对应的表版本号应该被初始化为1");
         
         // 其他表的版本号应该保持不变（因为我们只更新了用户表）
-        // 注意：这里的行为取决于具体的实现，如果实现了跨表依赖，则可能其他表也会更新
+        assertNull(updatedOrderVersion, "订单表版本号应该不存在");
+        assertNull(updatedProductVersion, "产品表版本号应该不存在");
     }
 }

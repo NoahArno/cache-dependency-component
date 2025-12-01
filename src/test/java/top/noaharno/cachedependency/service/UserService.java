@@ -1,13 +1,13 @@
-package top.noaharno.cacheconsistency.service;
+package top.noaharno.cachedependency.service;
 
 import com.alibaba.fastjson.JSON;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import top.noaharno.cacheconsistency.constant.CacheLevelEnum;
-import top.noaharno.cacheconsistency.entity.User;
-import top.noaharno.cacheconsistency.mapper.UserMapper;
+import top.noaharno.cachedependency.constant.CacheLevelEnum;
+import top.noaharno.cachedependency.entity.User;
+import top.noaharno.cachedependency.mapper.UserMapper;
 
 /**
  * @author NoahArno

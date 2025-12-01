@@ -1,19 +1,37 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+  
+  h2:
+    console:
+      enabled: true
+  
+  sql:
+    init:
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+      mode: always
+  
+  data:
+    redis:
+      host: 192.168.109.170
+      port: 6379
+      database: 0
+      
+logging:
+  level:
+    top.noaharno.cachedependency: DEBUG
+    
 cache:
   consistency:
     enabled: true
-    version-key-prefix: test:version
-    dependency-key-prefix: test:dependency
+    version-key-prefix: 'test:version:'
+    dependency-key-prefix: 'test:dependency:'
     clean-thread-pool-size: 5
     tables:
-      - t_xxxxx
-spring:
-  data:
-    redis:
-      host: ${CCC_REDIS_HOST}
-      port: 6379
-      database: 0
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${CCC_DB_URL}
-    username: root
-    password: ${CCC_DB_PASSWORD}
+      - users
+      - orders
+      - products

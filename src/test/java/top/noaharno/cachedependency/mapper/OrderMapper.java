@@ -1,7 +1,7 @@
-package top.noaharno.cacheconsistency.mapper;
+package top.noaharno.cachedependency.mapper;
 
 import org.apache.ibatis.annotations.*;
-import top.noaharno.cacheconsistency.entity.Order;
+import top.noaharno.cachedependency.entity.Order;
 
 import java.util.List;
 

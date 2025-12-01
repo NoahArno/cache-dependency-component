@@ -1,4 +1,4 @@
-package top.noaharno.cacheconsistency.entity;
+package top.noaharno.cachedependency.entity;
 
 import lombok.Data;
 

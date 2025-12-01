@@ -1,4 +1,4 @@
-package top.noaharno.cacheconsistency.util;
+package top.noaharno.cachedependency.util;
 
 /**
  * 缓存工具类

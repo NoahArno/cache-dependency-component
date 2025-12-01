@@ -1,7 +1,7 @@
-package top.noaharno.cacheconsistency.service;
+package top.noaharno.cachedependency.service;
 
 import lombok.extern.slf4j.Slf4j;
-import top.noaharno.cacheconsistency.config.CacheConsistencyProperties;
+import top.noaharno.cachedependency.config.CacheDependencyProperties;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -20,9 +20,9 @@ public class CacheDependencyService {
 
     private final StringRedisTemplate stringRedisTemplate;
 
-    private final CacheConsistencyProperties properties;
+    private final CacheDependencyProperties properties;
 
-    public CacheDependencyService(StringRedisTemplate stringRedisTemplate, CacheConsistencyProperties properties) {
+    public CacheDependencyService(StringRedisTemplate stringRedisTemplate, CacheDependencyProperties properties) {
         this.stringRedisTemplate = stringRedisTemplate;
         this.properties = properties;
     }
