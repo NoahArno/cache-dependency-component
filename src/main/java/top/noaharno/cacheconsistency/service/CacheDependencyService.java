@@ -1,5 +1,6 @@
 package top.noaharno.cacheconsistency.service;
 
+import lombok.extern.slf4j.Slf4j;
 import top.noaharno.cacheconsistency.config.CacheConsistencyProperties;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -12,6 +13,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  * @author NoahArno
  * @since 1.0.0
  */
+@Slf4j
 public class CacheDependencyService {
 
     private static final String INIT_VERSION = "1";
@@ -34,6 +36,10 @@ public class CacheDependencyService {
      */
     public void recordDependencies(String businessKey, int freshness, String... tables) {
         for (String tableName : tables) {
+            if (!properties.getTables().contains(tableName)) {
+                // 如果表名不在配置的表中，需要进行报错，避免表更新时缓存被遗漏
+                throw new RuntimeException("Table " + tableName + " is not in the configured tables.");
+            }
             recordDependency(tableName, businessKey, freshness);
         }
     }

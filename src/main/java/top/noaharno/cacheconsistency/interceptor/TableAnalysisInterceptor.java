@@ -37,6 +37,8 @@ public class TableAnalysisInterceptor implements Interceptor {
      */
     private final ScheduledExecutorService scheduledExecutorService;
 
+    private final CacheConsistencyProperties properties;
+
     /**
      * 用于跟踪正在处理的表删除任务
      */
@@ -47,6 +49,7 @@ public class TableAnalysisInterceptor implements Interceptor {
                                     CacheConsistencyProperties properties) {
         this.redisTemplate = redisTemplate;
         this.cacheDependencyService = cacheDependencyService;
+        this.properties = properties;
         // 初始化线程池
         this.scheduledExecutorService = Executors.newScheduledThreadPool(properties.getCleanThreadPoolSize());
     }
@@ -77,6 +80,11 @@ public class TableAnalysisInterceptor implements Interceptor {
 
             // 为每个表创建清理任务
             for (String table : tableSet) {
+                if (!properties.getTables().contains(table)) {
+                    // 不包含该表，表明该表不存在缓存依赖关系，直接跳过，可以避免频繁访问 redis
+                    continue;
+                }
+
                 // 取消该表之前的清理任务（如果有的话）
                 ScheduledFuture<?> previousTask = pendingCleanupTasks.remove(table);
                 if (previousTask != null && !previousTask.isDone()) {
@@ -93,7 +101,17 @@ public class TableAnalysisInterceptor implements Interceptor {
 
                 // 为每个新鲜度级别创建任务
                 for (CacheLevelEnum cacheLevel : CacheLevelEnum.getSortedValues()) {
-                    CacheCleanupTask task = new CacheCleanupTask(table, previousVersion, cacheLevel.getLevel());
+                    // 获取到当前缓存级别的缓存依赖关系
+                    Set<String> sortedMembers = redisTemplate.opsForZSet().rangeByScore(
+                            cacheDependencyService.getDependencyKey(table, String.valueOf(previousVersion)),
+                            cacheLevel.getLevel(),
+                            cacheLevel.getLevel()
+                    );
+                    // 如果没有依赖关系，则跳过，避免占用优先级队列
+                    if (sortedMembers.isEmpty()) {
+                        continue;
+                    }
+                    CacheCleanupTask task = new CacheCleanupTask(table, previousVersion, sortedMembers, cacheLevel.getLevel());
                     // 秒级新鲜度（级别为1）立即执行，其他级别延迟执行
                     if (cacheLevel.getLevel() == CacheLevelEnum.SECONDS.getLevel()) {
                         immediateTasks.add(task);
@@ -122,7 +140,7 @@ public class TableAnalysisInterceptor implements Interceptor {
     private void executeImmediateTasks(List<CacheCleanupTask> immediateTasks) {
         for (CacheCleanupTask task : immediateTasks) {
             try {
-                doCleanCacheDependencyByFreshness(task.table, task.previousVersion, task.cacheLevel);
+                doCleanCacheDependencyByFreshness(task.sortedMembers, task.cacheLevel);
             } catch (Exception e) {
                 log.error("立即清理缓存依赖关系失败: table={}, version={}, level={}",
                         task.table, task.previousVersion, task.cacheLevel, e);
@@ -144,7 +162,7 @@ public class TableAnalysisInterceptor implements Interceptor {
             CacheCleanupTask task = delayedTasks.poll();
             ScheduledFuture<?> future = scheduledExecutorService.schedule(() -> {
                 try {
-                    doCleanCacheDependencyByFreshness(task.table, task.previousVersion, task.cacheLevel);
+                    doCleanCacheDependencyByFreshness(task.sortedMembers, task.cacheLevel);
                 } catch (Exception e) {
                     log.error("延迟清理缓存依赖关系失败: table={}, version={}, level={}",
                             task.table, task.previousVersion, task.cacheLevel, e);
@@ -159,22 +177,14 @@ public class TableAnalysisInterceptor implements Interceptor {
         }
     }
 
-    private void doCleanCacheDependencyByFreshness(String table, Long previousVersion, Integer cacheLevel) {
+    private void doCleanCacheDependencyByFreshness(Set<String> sortedMembers, Integer cacheLevel) {
         try {
-            // 获取到当前缓存级别的缓存依赖关系
-            Set<String> sortedMembers = redisTemplate.opsForZSet().rangeByScore(
-                    cacheDependencyService.getDependencyKey(table, String.valueOf(previousVersion)),
-                    cacheLevel,
-                    cacheLevel
-            );
-
             if (!sortedMembers.isEmpty()) {
                 // 批量删除缓存
                 redisTemplate.delete(sortedMembers);
-                log.debug("已删除表 {} 版本 {} 级别 {} 的 {} 个缓存项", table, previousVersion, cacheLevel, sortedMembers.size());
             }
         } catch (Exception e) {
-            log.error("删除缓存依赖关系时发生错误: table={}, version={}, level={}", table, previousVersion, cacheLevel, e);
+            log.error("删除缓存依赖关系时发生错误: sortedMembers={}, level={}", sortedMembers, cacheLevel, e);
         }
     }
 
@@ -191,9 +201,11 @@ public class TableAnalysisInterceptor implements Interceptor {
     /**
      * 缓存清理任务类，实现了Comparable接口以支持优先级排序
      */
-    private record CacheCleanupTask(String table,
-                                    Long previousVersion,
-                                    Integer cacheLevel) implements Comparable<CacheCleanupTask> {
+    private record CacheCleanupTask(
+            String table,
+            long previousVersion,
+            Set<String> sortedMembers,
+            Integer cacheLevel) implements Comparable<CacheCleanupTask> {
 
         @Override
         public int compareTo(CacheCleanupTask other) {
