@@ -1,0 +1,19 @@
+cache:
+  consistency:
+    enabled: true
+    version-key-prefix: test:version
+    dependency-key-prefix: test:dependency
+    clean-thread-pool-size: 5
+    tables:
+      - t_xxxxx
+spring:
+  data:
+    redis:
+      host: ${CCC_REDIS_HOST}
+      port: 6379
+      database: 0
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${CCC_DB_URL}
+    username: root
+    password: ${CCC_DB_PASSWORD}
