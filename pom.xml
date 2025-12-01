@@ -28,6 +28,7 @@
         <lombok.version>1.18.40</lombok.version>
         <mysql.connector.version>8.0.33</mysql.connector.version>
         <mockito.version>5.8.0</mockito.version>
+        <fastjson.version>2.0.57</fastjson.version>
     </properties>
 
     <dependencies>
@@ -112,6 +113,13 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
             <scope>test</scope>
         </dependency>
 
