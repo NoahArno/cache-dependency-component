@@ -15,12 +15,24 @@ import java.util.Comparator;
 @Getter
 public enum CacheLevelEnum {
 
+    /**
+     * 秒级新鲜度
+     */
     SECONDS(1),
 
+    /**
+     * 分钟级新鲜度
+     */
     MINUTES(2),
 
+    /**
+     * 小时级新鲜度
+     */
     HOURS(3),
 
+    /**
+     * 天级新鲜度
+     */
     DAYS(4);
 
     /**

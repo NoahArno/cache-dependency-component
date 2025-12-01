@@ -40,14 +40,33 @@ public class CacheDependencyService {
 
     private void recordDependency(String tableName, String businessKey, int freshness) {
         // 1. 获取当前 table 最新的版本号
-        String versionKey = properties.getVersionKeyPrefix() + tableName;
+        String versionKey = getVersionKey(tableName);
         String currentVersion = redisTemplate.opsForValue().get(versionKey);
         if (StringUtils.isBlank(currentVersion)) {
             // 2. 如果 table 没有版本号，则设置初始版本号为 1
             redisTemplate.opsForValue().set(versionKey, INIT_VERSION);
             currentVersion = INIT_VERSION;
         }
-        redisTemplate.opsForZSet().add(properties.getDependencyKeyPrefix() + tableName + ":" + currentVersion, businessKey, freshness);
+        redisTemplate.opsForZSet().add(getDependencyKey(tableName, currentVersion), businessKey, freshness);
+    }
+
+    /**
+     * 获取表版本号键
+     * @param tableName 表名
+     * @return 表版本号键
+     */
+    public String getVersionKey(String tableName) {
+        return properties.getVersionKeyPrefix() + tableName;
+    }
+
+    /**
+     * 获取表依赖关系键
+     * @param tableName 表名
+     * @param version 版本号
+     * @return 表依赖关系键
+     */
+    public String getDependencyKey(String tableName, String version) {
+        return properties.getDependencyKeyPrefix() + tableName + ":" + version;
     }
 
 

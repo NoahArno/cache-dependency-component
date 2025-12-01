@@ -26,8 +26,9 @@ public class CacheConsistencyAutoConfiguration {
     }
 
     @Bean
-    public TableAnalysisInterceptor tableAnalysisInterceptor(StringRedisTemplate redisTemplate, CacheConsistencyProperties cacheConsistencyProperties) {
-        return new TableAnalysisInterceptor(redisTemplate, cacheConsistencyProperties);
+    public TableAnalysisInterceptor tableAnalysisInterceptor(StringRedisTemplate redisTemplate,
+                                                             CacheDependencyService cacheDependencyService) {
+        return new TableAnalysisInterceptor(redisTemplate, cacheDependencyService);
     }
 
     @Bean

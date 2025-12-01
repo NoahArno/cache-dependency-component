@@ -2,6 +2,7 @@ package top.noaharno.cacheconsistency.interceptor;
 
 import top.noaharno.cacheconsistency.config.CacheConsistencyProperties;
 import top.noaharno.cacheconsistency.constant.CacheLevelEnum;
+import top.noaharno.cacheconsistency.service.CacheDependencyService;
 import top.noaharno.cacheconsistency.util.SqlAnalysisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.javassist.bytecode.analysis.Executor;
@@ -31,11 +32,12 @@ public class TableAnalysisInterceptor implements Interceptor {
 
     private final StringRedisTemplate redisTemplate;
 
-    private final CacheConsistencyProperties properties;
+    private final CacheDependencyService cacheDependencyService;
 
-    public TableAnalysisInterceptor(StringRedisTemplate redisTemplate, CacheConsistencyProperties cacheConsistencyProperties) {
+    public TableAnalysisInterceptor(StringRedisTemplate redisTemplate,
+                                    CacheDependencyService cacheDependencyService) {
         this.redisTemplate = redisTemplate;
-        this.properties = cacheConsistencyProperties;
+        this.cacheDependencyService = cacheDependencyService;
     }
 
     @Override
@@ -62,7 +64,11 @@ public class TableAnalysisInterceptor implements Interceptor {
             for (String table : tableSet) {
                 CompletableFuture.runAsync(() -> {
                     // 清空之前，自增版本号
-                    Long incrementedVersion = redisTemplate.opsForValue().increment(properties.getVersionKeyPrefix() + table);
+                    long incrementedVersion = redisTemplate.opsForValue().increment(cacheDependencyService.getVersionKey(table));
+                    if (incrementedVersion == 1) {
+                        // 版本号为 1 的时候，表示一开始缓存里面没有任何依赖关系，不需要进行任何处理
+                        return;
+                    }
                     Long previousVersion = incrementedVersion - 1;
                     // 获取 ZSET 中的所有成员，按照缓存新鲜度级别分别进行清除
                     for (CacheLevelEnum cacheLevel : CacheLevelEnum.getSortedValues()) {
@@ -78,7 +84,7 @@ public class TableAnalysisInterceptor implements Interceptor {
 
     private void doCleanCacheDependencyByFreshness(String table, Long previousVersion, Integer cacheLevel) {
         // 获取到当前缓存级别的缓存依赖关系
-        Set<String> sortedMembers = redisTemplate.opsForZSet().rangeByScore(properties.getDependencyKeyPrefix() + table + ":" + previousVersion, cacheLevel, cacheLevel);
+        Set<String> sortedMembers = redisTemplate.opsForZSet().rangeByScore(cacheDependencyService.getDependencyKey(table, String.valueOf(previousVersion)), cacheLevel, cacheLevel);
         redisTemplate.delete(sortedMembers);
         // FIXME 休眠 5 秒，避免同时清除大量 Key 导致业务操作阻塞，以及缓存雪崩
         try {
